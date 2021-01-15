@@ -64,7 +64,7 @@ def profile(request, username):
 
 ########## CatToy ###########
 def cattoys_index(request):
-    cattoys = CatToy.object.all()
+    cattoys = CatToy.objects.all()
     return render(request, 'cattoys/index.html', {'cattoys': cattoys})
 
 
@@ -81,7 +81,7 @@ class CatToyCreate(CreateView):
 
 class CatToyUpdate(UpdateView):
     model = CatToy
-    feilds = ['name', 'color']
+    fields = ['name', 'color']
     success_url = '/cattoys'
 
 
