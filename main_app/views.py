@@ -1,20 +1,11 @@
 from django.shortcuts import render
-from .models import Cat
+from .models import Cat, CatToy
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth.models import User
 
 
-# class Cat:
-#     def __init__(self, name, breed, description, age):
-#         self.name = name
-#         self.breed = breed
-#         self.description = description
-#         self.age = age
-
-
-# cats = [
-#     Cat('Stella', 'tuxedo', 'demon kitty', 1),
-#     Cat('Piper', 'simese', 'angel kitty', 1.5),
-#     Cat('bella', 'calico', 'mama kittys kitten', 0)
-# ]
+# Create your views here.
 
 
 def index(request):
@@ -24,7 +15,76 @@ def index(request):
 def about(request):
     return render(request, 'about.html')
 
+########### CATS ###########
+
 
 def cats_index(request):
     cats = Cat.objects.all()
     return render(request, 'cats/index.html', {'cats': cats})
+
+
+def cats_show(request, cat_id):
+    cat = Cat.objects.get(id=cat_id)
+    return render(request, 'cats/show.html', {'cat': cat})
+
+
+class CatCreate(CreateView):
+    model = Cat
+    fields = '__all__'
+    success_url = '/cats'
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.user = self.request.user
+        self.object.save()
+        return HttpResponseRedirect('/cats')
+
+
+class CatUpdate(UpdateView):
+    model = Cat
+    fields = ['name', 'breed', 'description', 'age']
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.save()
+        return HttpResponseRedirect('/cats')
+
+
+class CatDelete(DeleteView):
+    model = Cat
+    success_url = '/cats'
+
+
+######## USER ########
+def profile(request, username):
+    user = User.objects.get(username=username)
+    cats = Cat.objects.filter(user=user)
+    return render(request, 'profile.html', {'username': username, 'cats': cats})
+
+
+########## CatToy ###########
+def cattoys_index(request):
+    cattoys = CatToy.object.all()
+    return render(request, 'cattoys/index.html', {'cattoys': cattoys})
+
+
+def cattoys_show(request, cattoy_id):
+    cattoy = CatToy.objects.get(id=cattoy_id)
+    return render(request, 'cattoys/show.html', {'cattoy': cattoy})
+
+
+class CatToyCreate(CreateView):
+    model = CatToy
+    fields = '__all__'
+    success_url = '/cattoys'
+
+
+class CatToyUpdate(UpdateView):
+    model = CatToy
+    feilds = ['name', 'color']
+    success_url = '/cattoys'
+
+
+class CatToyDelete(DeleteView):
+    model = CatToy
+    success_url = '/cattoys'
